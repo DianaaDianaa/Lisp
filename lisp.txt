@@ -1,0 +1,936 @@
+;Define a function in Lisp which merges, without keeping the doubles, two sorted linear lists. 
+
+(defun mergeL (l p)
+    (cond
+    ((null p) l)
+    ((null l) p)
+    ((= (car l) (car p)) (cons (car l) (mergeL (cdr l) (cdr p))))
+    ((< (car l) (car p)) (cons (car l) (mergeL (cdr l) p)))
+    (T (cons (car p) (mergeL l (cdr p))))
+    )
+)
+
+(setq l1 '(1 2 6 8 9))
+(setq l2 '(1 2 7 8 10 11 12))
+(setq result (mergeL l1 l2))
+(princ result)
+
+
+
+; Define a function to remove all the occurrences of an element from a nonlinear list. 
+
+(defun removeAll (l e)
+    (cond
+    ((null l) nil)
+    ((listp (car l)) (cons (removeAll (car l) e) (removeAll (cdr l) e)))
+    ((= (car l) e) (removeAll (cdr l) e))
+    (T (cons (car l) (removeAll (cdr l) e)))
+    )
+)
+
+(setq L '((1 2) 3 4 (1 (4 5 1)) 1))
+(setq result (removeAll L 1))
+(princ result)
+
+
+
+;Build a list with the positions of the minimum number from a linear list. 
+
+(defun posMin(l minC posC lPos)
+    (cond
+    ((null l) lPos)
+    ((not (numberp (car l))) (posMin (cdr l) minC (+ posC 1) lPos))
+    ((not (numberp minC)) (posMin (cdr l) (car l) (+ posC 1) (list posC)))
+    ((= minC (car l)) (posMin (cdr l) minC (+ posC 1) (append lPos (list posC))))
+    ((< (car l) minC) (posMin (cdr l) (car l) (+ posC 1) (list posC)))
+    (T (posMin (cdr l) minC (+ posC 1) lPos))
+    )
+)
+
+(defun posMinMain (l)
+    (posMin l (car l) 1 nil)
+)
+
+(setq result (posMinMain '(a 3 1 9 8 10 b 1)))
+(princ result)
+
+
+
+;Given a linear list, add elements from N to N. 
+
+(defun addN (l e N c)
+    (cond
+    ((null l) nil)
+    ((= N c) (cons e (addN l e N 1)))
+    (T (cons (car l) (addN (cdr l) e N (+ c 1))))
+    )
+)
+
+(defun addNmain (l e N)
+    (addN l e N 1)
+)
+
+(setq result (addNmain '(1 2 6 1 a 9 a) 20 3))
+(princ result)
+
+
+
+L1a.1
+;Write a function to return the n-th element of a list, or NIL if such an element does not exist.
+
+(defun f (l N)
+    (cond
+    ((null l) nil)
+    ((= N 1) (car l))
+    (t (f (cdr l) (- N 1)))
+    )
+)
+
+(princ (f '(1 5 23 9 10 2 1) 1))
+
+
+
+;Write a function to check whether an atom E is amember of a list which is not necessarily linear.
+
+(defun f (l e)
+    (cond
+    ((null l) nil)
+    ((and (atom (car l)) (equal (car l) e)) T)
+    ((listp (car l)) (or (f (car l) e) (f (cdr l) e)))
+    (t (f (cdr l) e))
+    )
+)
+
+(princ (f '(a 1 (b c) 12 (10 (d)) 1) 'd))
+
+
+
+;Write a function to determine the listof all sublists of a given list, on any level. 
+;A sublist is either the list itself, or any element that is a list, at any level. 
+;Example: (1 2 (3 (4 5)(6 7)) 8 (9 10)) => 
+;5sublists:(  (1 2 (3 (4 5) (6 7)) 8 (9 10))    (3 (4 5) (6 7))     (4 5)   (6 7)   (9 10) )
+
+(defun f (l)
+    (cond
+    ((null l) nil)
+    ((listp (car l)) (cons (car l) (append (f (car l)) (f (cdr l)))))
+    (t (f (cdr l)))
+    )
+)
+
+(defun fMain (l)
+    (cons l (f l))
+)
+
+(princ (fMain '(1 2 (3 (4 5)(6 7)) 8 (9 10))))
+
+;OR
+
+(defun f (l)
+    (cond
+    ((atom l) nil)
+    (t (apply 'append (list l) (mapcar 'f l)))
+    )
+)
+
+(princ (f '(1 2 (3 (4 5)(6 7)) 8 (9 10))))
+
+
+
+;Write a function to transform a linear list into a set.
+
+(defun remE (l e)
+    (cond
+    ((null l) nil)
+    ((= (car l) e) (remE (cdr l) e))
+    (t (cons (car l) (remE (cdr l) e)))
+    )
+)
+
+(defun listToSet (l)
+    (cond
+    ((null l) nil)
+    (t (cons (car l) (listToSet (remE (cdr l) (car l)))))
+    )
+)
+
+(princ (listToSet '(1 1 2 2 3 4 4 4 5 6 6)))
+
+
+
+L1a.2
+;Write a function to return the product of two vectors.
+
+(defun dotP (l p)
+    (cond
+    ((and (null l) (null p)) 0)
+    (t (+ (* (car l) (car p)) (dotP (cdr l) (cdr p))))
+    )
+)
+
+(princ (dotP '(1 2) '(4 5)))
+
+
+
+;Write a function to return the depth of a list. Example: the depth of a linear list is 1.
+
+(defun myMax (a b)
+    (cond
+    ((> a b) a)
+    (t b)
+    )
+)
+
+(defun findDepth (l d)
+    (cond
+    ((null l) d)
+    ((listp (car l)) (myMax (findDepth (car l) (+ d 1)) (findDepth (cdr l) d)))
+    (t (findDepth (cdr l) d))
+    )
+)
+
+(defun findDepthMain (l)
+    (findDepth l 1)
+)
+
+(princ (findDepthMain '(1 (2 (3) (4)) (5))))
+
+
+
+;Write a function to sort a linear list without keeping the double values.
+
+(defun insert (l e)
+    (cond
+    ((null l) (list e))
+    ((= e (car l)) l)
+    ((< e (car l)) (cons e l))
+    (t (cons (car l) (insert (cdr l) e)))
+    )
+)
+
+(defun sortL (l)
+    (cond
+    ((null l) nil)
+    (t (insert (sortL (cdr l)) (car l)))
+    )
+)
+
+(princ (sortL '(7 8 7 11 99 11 12 1)))
+
+
+
+;Write a function to return the intersection of two sets.
+
+(defun contains (l e)
+    (cond
+    ((null l) nil)
+    ((equal e (car l)) t)
+    (t (contains (cdr l) e))
+    )
+)
+
+(defun intersect (l p)
+    (cond
+    ((null l) nil)
+    ((contains p (car l)) (cons (car l) (intersect (cdr l) p)))
+    (t (intersect (cdr l) p))
+    )
+)
+
+(princ (intersect '(1 5 0 5 6 8) '(0 2 9 11 6)))
+
+
+
+L1a.14
+;Write a function to return the union of two sets.
+
+(defun removeFirstOcc (l e)
+    (cond
+    ((null l) nil)
+    ((equal (car l) e) (cdr l))
+    (t (cons (car l) (removeFirstOcc (cdr l) e)))
+    )
+)
+
+(defun myUnion (l p)
+    (cond
+    ((and (null l) (null p)) nil)
+    ((null l) p)
+    ((null p) l)
+    (t (cons (car l) (myUnion (cdr l) (removeFirstOcc p (car l)))))
+    )
+)
+
+(princ (myUnion '(1 2 6 8 9) '(1 2 6 7 8 11 12)))
+
+
+
+;Write a function to return the product of all numerical atoms in a list, at any level.
+
+(defun p (l)
+    (cond
+    ((null l) 1)
+    ((numberp (car l)) (* (car l) (p (cdr l))))
+    ((listp (car l)) (* (p (car l)) (p (cdr l))))
+    (t (p (cdr l)))
+    )
+)
+
+(princ (p '(1 a (2 c (3) () (4  2 (10 d () 5))) b 2)))
+
+
+
+;Write a function to sort a linear list with keeping the double values.
+
+(defun minElem (l m)
+    (cond
+    ((null l) m)
+    ((< (car l) m) (minElem (cdr l) (car l)))
+    (t (minElem (cdr l) m))
+    )
+)
+
+(defun minMain (l)
+    (minElem l (car l))
+)
+
+(defun removeFirstOcc (l e)
+    (cond
+    ((null l) nil)
+    ((equal (car l) e) (cdr l))
+    (t (cons (car l) (removeFirstOcc (cdr l) e)))
+    )
+)
+
+(defun mySort (l)
+    (cond
+    ((null l) nil)
+    (t (cons (minMain l) (mySort (removeFirstOcc l (minMain l)))))
+    )
+)
+
+(princ (mySort '(4 5 6 4 0 2 1)))
+
+
+
+;Build a list which contains positions of a minimum numeric element from a given linear list.
+
+(defun minElem (l m)
+    (cond
+    ((null l) m)
+    ((< (car l) m) (minElem (cdr l) (car l)))
+    (t (minElem (cdr l) m))
+    )
+)
+
+(defun minMain (l)
+    (minElem l (car l))
+)
+
+(defun f (l pos lMain)
+    (cond
+    ((null l) nil)
+    ((equal (car l) (minMain lMain)) (cons pos (f (cdr l) (+ pos 1) lMain)))
+    (t (f (cdr l) (+ pos 1) lMain))
+    )
+)
+
+(defun fMain (l)
+    (f l 1 l)
+)
+
+(princ (fMain '(4 5 6 0 4 1 0 2 1)))
+
+
+L1a.15
+;Write a function to insert an element E on the n-th position of a linear list.
+
+(defun insE (l N e)
+    (cond 
+    ((null l) nil)
+    ((= N 1) (cons e l))
+    (t (cons (car l) (insE (cdr l) (- N 1) e)))
+    )
+)
+
+(princ (insE '(1 4 5 2) 4 99))
+
+
+
+;Write a function to return the sum of all numerical atoms of a list, at any level.
+
+(defun sumL (l)
+    (cond
+    ((null l) 0)
+    ((numberp (car l)) (+ (car l) (sumL (cdr l))))
+    ((atom (car l)) (sumL (cdr l)))
+    (t (+ (sumL (car l)) (sumL (cdr l))))
+    )
+)
+
+(princ (sumL '(1 2 (a b 3 (5 6) (9 (10 c)) 1))))
+
+
+
+;Write a function to return the set of all sublists of a given linear list. 
+;Ex. For list ((1 2 3) ((4 5) 6)) => ((1 2 3) (4 5) ((4 5) 6)) 
+
+(defun f (l)
+    (cond
+    ((null l) nil)
+    ((listp (car l)) (cons (car l) (append (f (car l)) (f (cdr l)))))
+    (t (f (cdr l)))
+    )
+)
+
+(princ (f '((1 2 3) ((4 5) 6))))
+
+
+
+L1B
+As an example, the tree
+   A
+   / \
+   B  C
+     / \
+     D   E
+is represented as follows:
+(A 2 B 0 C 2 D 0 E 0)   (1)
+(A (B) (C (D) (E)))     (2)
+
+
+L1b.1
+;For a given tree of type (1) return the path from the root node to acertain given node X.
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun checkExistence (l e)
+     (cond
+     ((null l) nil)
+     ((equal (car l) e) T)
+     (t (checkExistence (cdr l) e))
+     )
+)
+
+(defun checkExistenceLeft (l e)
+     (checkExistence (left l) e)
+)
+
+(defun checkExistenceRight (l e)
+     (checkExistence (right l) e)
+)
+
+(defun path (l elem)
+    (cond
+    ((null l) nil)
+    ((equal (car l) elem) (list elem))
+    ((checkExistenceRight l elem) (cons (car l) (path (right l) elem)))
+    (t (cons (car l) (path (left l) elem)))
+    )
+)
+
+(princ (path '(A 2 B 0 C 2 D 0 E 0)'D))
+
+
+L1b.2
+;Return the list of nodes on the k-th level of a tree of type (1).
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun kLvl (l lvl k)
+    (cond
+    ((null l) nil)
+    ((= lvl k) (list (car l)))
+    (t (append (kLvl (left l) (+ 1 lvl) k) (kLvl (right l) (+ 1 lvl) k)))
+    )
+)
+
+(defun kLvlMain (l k)
+    (kLvl l 1 k)
+)
+
+(princ (kLvlMain '(A 2 B 0 C 2 D 0 E 0) 2))
+
+
+
+L1b.3
+;Return the number of levels of a tree of type (1).
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((= nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun kLvl (l lvl k)
+    (cond
+    ((null l) nil)
+    ((= lvl k) (list (car l)))
+    (t (append (kLvl (left l) (+ 1 lvl) k) (kLvl (right l) (+ 1 lvl) k)))
+    )
+)
+
+(defun myMax (a b)
+    (cond
+    ((> a b) a)
+    (t b)
+    )
+)
+
+(defun levels (l counter)
+    (cond 
+    ((null l) counter)
+    (t (myMax (levels (left l) (+ counter 1)) (levels (right l) (+ counter 1))))
+    )
+)
+
+(defun levelsMain (l)
+    (levels l 0)
+)
+
+(princ (levelsMain '(A 2 B 0 C 2 D 0 E 0)))
+
+
+
+L1b.4
+;Convert a tree of type (2) to type (1).
+
+(defun convert (l)
+    (cond
+    ((null l) nil)
+    ((and (not (null (cadr l))) (not (null (caddr l)))) (append (list (car l)) '(2) (convert (cadr l)) (convert (caddr l))))
+    ((not (null (cadr l))) (append (list (car l)) '(1) (convert (cadr l))))
+   ;((not (null (caddr l))) (append (list (car l)) '(1) (convert (caddr l))))
+    (t (append (list (car l)) '(0)))
+    )
+)
+
+(princ (convert '(A (B) (C (D) (E)))))
+
+
+
+L1b.5
+;Return the level (depth) of a node in a tree of type (1). The level of the root element is 0.
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun checkExistence (l elem)
+    (cond
+    ((null l) nil)
+    ((equal (car l) elem) t)
+    (t (checkExistence (cdr l) elem))
+    )
+)
+
+(defun checkExistenceLeft (l elem)
+    (checkExistence (left l) elem)
+)
+
+(defun checkExistenceRight (l elem)
+    (checkExistence (right l) elem)
+)
+
+(defun nodeLevel (l node level)
+    (cond
+    ((or (null l) (equal (car l) node)) level)
+    ((checkExistenceLeft l node) (nodeLevel (left l) node (+ level 1)))
+    (t (nodeLevel (right l) node (+ level 1)))
+    )
+)
+
+(defun nodeLevelMain (l node)
+    (nodeLevel l node 0)
+)
+
+(princ (nodeLevelMain '(A 2 B 0 C 2 D 0 E 0) 'D))
+
+
+
+L1b.6
+; Return the list of nodes of a tree of type (1) accessed inorder.
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun inOrder (l)
+    (cond
+    ((null l) nil)
+    (t (append (inOrder (left l)) (cons (car l) (inOrder (right l)))))
+    )
+)
+
+(princ (inOrder '(A 2 B 0 C 2 D 0 E 0)))
+
+
+
+L1b.8
+;Return the list of nodes of a tree of type (2) accessed inorder.
+
+(defun inOrder (l)
+    (cond
+    ((null l) nil)
+    (t (append (inOrder (cadr l)) (cons (car l) (inOrder (caddr l)))))
+    )
+)
+
+(princ (inOrder '(A (B) (C (D) (E)))))
+
+
+
+L1b.9
+;Convert a tree of type (1) to type (2).
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun myAppend (l p)
+    (cond
+    ((null l) p)
+    (t (cons (car l) (myAppend (cdr l) p)))
+    )
+)
+
+(defun convert (l)
+    (cond
+    ((null l) nil)
+    ((equal (cadr l) 2) (myAppend (list (car l)) (cons (convert (left l)) (list (convert (right l))))))
+    ((equal (cadr l) 1) (myAppend (list (car l)) (list (convert (left l)))))
+    (t (list (car l)))
+    )
+)
+
+(princ (convert '(A 2 B 0 C 2 D 0 E 0)))
+
+
+
+L1b.10
+;Return the level of a nodeX in a tree of type (2). The level of the root element is 0.
+
+(defun nodeLevel (l node level)
+    (cond
+    ((null l) 0)
+    ((equal node (car l)) level)
+    (t (+ (nodeLevel (cadr l) node (+ level 1)) (nodeLevel (caddr l) node (+ level 1))))
+    )
+)
+
+(defun nodeLevelMain (l node)
+    (nodeLevel l node 0)
+)
+
+(princ (nodeLevelMain '(A (B) (C (D) (E))) 'C))
+
+
+
+L1b.12
+;Determine the list of nodes accesed in preorder in a tree of type (2).
+
+(defun preorder (l)
+    (cond
+    ((null l) nil)
+    (t (cons (car l) (append (preorder (cadr l)) (preorder (caddr l)))))
+    )
+)
+
+(princ (preorder '(A (B) (C (D) (E)))))
+
+
+
+L1b.13
+;For a given tree of type (2) return the path from the root node to a certain given node X.
+
+(defun checkExists (l e)
+    (cond
+    ((null l) nil)
+    ((equal (car l) e) t)
+    ((listp (car l)) (or (checkExists (car l) e) (checkExists (cdr l) e)))
+    (t (checkExists (cdr l) e))
+    )
+)
+
+(defun path (l node)
+    (cond
+    ((null l) nil)
+    ((equal (car l) node) (list node))
+    ((checkExists (cadr l) node) (cons (car l) (path (cadr l) node)))
+    (t (cons (car l) (path (caddr l) node)))
+    )
+)
+
+(princ (path '(A (B) (C (D) (E))) 'C))
+
+
+
+L1b.14
+;Determine the list of nodes accesed in postorder in a tree of type (1).
+
+(defun goThroughLeft (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) nil)
+    (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ nodes 1) (+ edges (cadr l))))))
+    )
+)
+
+(defun left (l)
+    (goThroughLeft (cddr l) 0 0)
+)
+
+(defun goThroughRight (l nodes edges)
+    (cond
+    ((null l) nil)
+    ((equal nodes (+ edges 1)) l)
+    (t (goThroughRight (cddr l) (+ nodes 1) (+ edges (cadr l))))
+    )
+)
+
+(defun right (l)
+    (goThroughRight (cddr l) 0 0)
+)
+
+(defun myAppend (l p)
+    (cond
+    ((null l) p)
+    (t (cons (car l) (myAppend (cdr l) p)))
+    )
+)
+
+(defun postorder (l)
+    (cond
+    ((null l) nil)
+    (t (myAppend (postorder (left l)) (myAppend (postorder(right l)) (list (car l)))))
+    )
+)
+
+(princ (postorder '(A 2 B 0 C 2 D 0 E 0)))
+
+
+
+L1b.15
+;Determine the list of nodes accesed in postorder in a tree of type (2).
+
+(defun myAppend (l p)
+    (cond
+    ((null l) p)
+    (t (cons (car l) (myAppend (cdr l) p)))
+    )
+)
+
+(defun postorder(l)
+    (cond
+    ((null l) nil)
+    (t (myAppend (postorder (cadr l)) (myAppend (postorder (caddr l)) (list (car l)))))
+    )
+)
+
+(princ (postorder '(A (B) (C (D) (E))) ) )
+
+
+
+L1b.16
+; Determine  if  a  tree  of  type  (2)  is ballanced  (the  differencebetween  the  depth  of  two  subtrees  is equal to 1).
+
+(defun myMax (a b)
+    (cond
+    ((> a b) a)
+    (t b)
+    )
+)
+
+(defun getDepth (l)
+    (cond
+    ((null l) 0)
+    (t (+ 1 (myMax (getDepth (cadr l)) (getDepth (caddr l)))))
+    )
+)
+
+(defun absDiff (a b)
+    (cond
+    ((> a b) (- a b))
+    (t (- b a))
+    )
+)
+
+(defun isBalanced (l)
+    (cond
+    ((null l) t)
+    ((> (absDiff (getDepth (cadr l)) (getDepth (caddr l))) 1) nil)
+    (t (and (isBalanced (cadr l)) (isBalanced (caddr l))))
+    )
+)
+
+(princ (isBalanced '(A)))
+(terpri)
+(princ (isBalanced '(A (B (C) ()) ())))
+(terpri)
+(princ (isBalanced '(A (B (C) ()) (D))))
+(terpri)
+(princ (isBalanced '(A (B (C) ()) (D (E () (F () (G))) ()))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,70 @@
+;Return the list of nodes of a tree of type (1) accessed inorder.
+
+;goThroughLeft(l1..ln,nodes,edges):
+;nil, n=0
+;nil, nodes = 1 + edges
+;{l1} U {l2} U goThroughLeft(l3..ln,nodes+1,edges+l2), othrwise
+
+(defun goThroughLeft (l nodes edges)
+     (cond
+          ((null l) nil)
+          ((= nodes (+ 1 edges)) nil)
+          (t (cons (car l) (cons (cadr l) (goThroughLeft (cddr l) (+ 1 nodes) (+ (cadr l) edges)))))
+     )
+)
+
+;left(l1..ln)=
+;goThroughLeft(l3..ln,0,0)
+
+(defun left (l)
+      (goThroughLeft (cddr l) 0 0)
+)
+
+;goThroughRight(l1..ln,nodes,edges)=
+;nil, n=0
+;l1..ln, nodes = 1 + edges
+;goThroughRight(l3..ln,nodes+1,edges+l2), otherwise
+
+(defun goThroughRight (l nodes edges)
+     (cond
+          ((null l) nil)
+          ((= nodes (+ 1 edges)) l)
+          (t (goThroughRight (cddr l) (+ 1 nodes) (+ edges (cadr l))))
+     )
+)
+
+;right(l1..ln)=
+;goThroughRight(l3..ln,0,0)
+
+(defun Right (l)
+     (goThroughRight (cddr l) 0 0)
+)
+
+
+;myAppend(l1..ln, p1..pm)=
+;p1..pm, n=0
+;{l1} U myAppend(l2..ln,p1..pm), otherwise
+
+(defun myAppend (l p)
+     (cond
+          ((null l) p)
+          (t (cons (car l) (myAppend (cdr l) p)))
+     )
+)
+
+
+;inOrder(l1..ln)=
+;nil, n=0
+;myAppend(inOrder(left(l1..ln)), myAppend((list(l1), inOrder(right(l1..ln))))), otherwise
+
+(defun inOrder (l)
+     (cond
+          ((null l) nil)
+          (t (myAppend (inorder (left l)) (myAppend (list (car l )) (inOrder (right l)))))
+     )
+)
+
+
+(setq myList (list 'A '2 'B '0 'C '2 'D '0 'E '0))
+(setq result (inOrder myList))
+(princ result)
